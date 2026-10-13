@@ -7,17 +7,6 @@
 A Telegram bot that tells you when something you're waiting for is back in stock or gets cheaper.
 You send it a link and that's it, there's nothing else to set up.
 
-## Why I built it
-
-[inventory-hunter](https://github.com/EricJMarti/inventory-hunter) helped a lot of people get their GPUs in 2020 and then quietly stopped working.
-Every shop needed its own config full of CSS selectors that broke whenever the site changed, and it ran
-a headless Chrome inside Docker that kept crashing. Most of its open issues are people asking why it
-doesn't work anymore.
-
-shelfwatch doesn't look at the page layout at all. Most shops already put product data into the page
-for Google: the price, the currency and whether the item is in stock. The bot reads that, so there's
-nothing to configure for each shop and nothing to fix when a shop gets a redesign.
-
 ## What it does
 
 When you send a link, the bot opens the page and shows you the price and stock right away. After that
