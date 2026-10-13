@@ -4,66 +4,68 @@
 ![python](https://img.shields.io/badge/python-3.13-0B0F14)
 ![license](https://img.shields.io/badge/license-MIT-0B0F14)
 
-A Telegram bot that watches product pages and messages you when an item is back in stock or gets cheaper.
-Send it a link. That is the whole setup.
+A Telegram bot that tells you when something you're waiting for is back in stock or gets cheaper.
+You send it a link and that's it, there's nothing else to set up.
 
-## Why
+## Why I built it
 
-[inventory-hunter](https://github.com/EricJMarti/inventory-hunter) got a lot of people their GPUs in 2020,
-then stopped working: every shop needed a hand-written YAML file with CSS selectors that broke on the next
-redesign, and a headless Chrome inside Docker that kept crashing.
+inventory-hunter helped a lot of people get their GPUs in 2020 and then quietly stopped working.
+Every shop needed its own config full of CSS selectors that broke whenever the site changed, and it ran
+a headless Chrome inside Docker that kept crashing. Most of its open issues are people asking why it
+doesn't work anymore.
 
-shelfwatch takes a different route. Shops already publish machine-readable product data for search engines
-(schema.org JSON-LD, microdata, OpenGraph). Reading that instead of the page layout means no per-shop config,
-no browser, and nothing to fix when a shop changes its design.
+shelfwatch doesn't look at the page layout at all. Most shops already put product data into the page
+for Google: the price, the currency and whether the item is in stock. The bot reads that, so there's
+nothing to configure for each shop and nothing to fix when a shop gets a redesign.
 
-## How it works
+## What it does
+
+When you send a link, the bot opens the page and shows you the price and stock right away. After that
+it checks the page every 15 minutes and writes to you when the item comes back, when the price goes
+down, or when it reaches the price you set.
+
+It only opens public addresses, so nobody can use it to reach the server's own network. It waits a few
+seconds between requests to the same shop, and if a page keeps failing it checks it less and less often.
+
+## Running it
+
+Create a bot with [@BotFather](https://t.me/BotFather) and copy the token. Then:
 
 ```
-link ─► fetch ─► extract ─► store ─► watcher (every 15 min) ─► diff ─► Telegram
-         │          │                    │
-         │          │                    └─ exponential backoff for pages that keep failing
-         │          └─ JSON-LD → microdata → OpenGraph, cheapest offer, best availability
-         └─ public hosts only (redirects re-checked), per-shop rate limit, 5 MB cap
+cp .env.example .env
+docker compose up -d
 ```
 
-You get a message when:
+Put the token into `.env` before starting. If you'd rather skip Docker, this does the same:
 
-- an item that was out of stock or on pre-order is available again
-- the price drops
-- the price falls to the target you set
+```
+uv sync
+uv run shelfwatch
+```
 
-## Run
-
-1. Create a bot with [@BotFather](https://t.me/BotFather) and copy the token.
-2. `cp .env.example .env` and paste the token.
-3. `docker compose up -d`
-
-Without Docker: `uv sync && uv run shelfwatch`.
-
-| variable | default | |
+| variable | default | what it does |
 |---|---|---|
-| `SHELFWATCH_BOT_TOKEN` | — | required |
-| `SHELFWATCH_DATABASE_URL` | `sqlite+aiosqlite:///data/shelfwatch.db` | any SQLAlchemy async URL |
+| `SHELFWATCH_BOT_TOKEN` | | token from BotFather, required |
+| `SHELFWATCH_DATABASE_URL` | `sqlite+aiosqlite:///data/shelfwatch.db` | any async SQLAlchemy URL |
 | `SHELFWATCH_CHECK_INTERVAL` | `900` | seconds between checks of one item |
 | `SHELFWATCH_PER_HOST_INTERVAL` | `5` | seconds between requests to the same shop |
-| `SHELFWATCH_MAX_WATCHES_PER_CHAT` | `25` | |
+| `SHELFWATCH_MAX_WATCHES_PER_CHAT` | `25` | how many items one chat can watch |
 
-## What it can and can't watch
+## Where it works
 
-Works with shops that publish product data: Shopify, WooCommerce, Magento and most mid-sized stores.
-
-Doesn't work yet with pages rendered entirely in JavaScript and with marketplaces that block automated
-requests (Amazon, Ozon, Wildberries and similar). Those need dedicated adapters; see the issues.
+It works well on shops that publish product data, which is most stores built on Shopify, WooCommerce
+or Magento. Big marketplaces usually block bots, and some sites build the whole page with JavaScript,
+so the bot can't read those yet. Support for specific marketplaces is next on my list.
 
 ## Development
 
 ```
 uv sync
 uv run pytest
-uv run ruff check . && uv run mypy src tests
+uv run ruff check .
+uv run mypy src tests
 ```
 
 ## License
 
-MIT © 2026 [qweendev](https://github.com/qweendev)
+MIT, see [LICENSE](LICENSE).
