@@ -9,7 +9,7 @@ You send it a link and that's it, there's nothing else to set up.
 
 ## Why I built it
 
-inventory-hunter helped a lot of people get their GPUs in 2020 and then quietly stopped working.
+[inventory-hunter](https://github.com/EricJMarti/inventory-hunter) helped a lot of people get their GPUs in 2020 and then quietly stopped working.
 Every shop needed its own config full of CSS selectors that broke whenever the site changed, and it ran
 a headless Chrome inside Docker that kept crashing. Most of its open issues are people asking why it
 doesn't work anymore.

@@ -18,8 +18,6 @@ from shelfwatch.store import Store, Watch, WatchLimitReachedError
 from shelfwatch.texts import card, language, money, t
 from shelfwatch.watcher import Change, ChangeKind
 
-router = Router(name="shelfwatch")
-
 
 class Action(StrEnum):
     TARGET = "target"
@@ -82,20 +80,17 @@ def _lang(message: Message | CallbackQuery) -> str:
     return language(message.from_user.language_code if message.from_user else None)
 
 
-@router.message(CommandStart())
 async def start(message: Message, state: FSMContext) -> None:
     await state.clear()
     await message.answer(t(_lang(message), "start"))
 
 
-@router.message(Command("list"))
 async def show_list(message: Message, store: Store, state: FSMContext) -> None:
     await state.clear()
     text, keyboard = list_view(_lang(message), await store.for_chat(message.chat.id))
     await message.answer(text, reply_markup=keyboard)
 
 
-@router.message(TargetPrice.waiting, F.text)
 async def receive_target(message: Message, store: Store, state: FSMContext) -> None:
     lang = _lang(message)
     price = parse_price(message.text or "")
@@ -113,7 +108,6 @@ async def receive_target(message: Message, store: Store, state: FSMContext) -> N
         await message.answer(t(lang, "target_cleared"))
 
 
-@router.message(F.text)
 async def add_watch(
     message: Message, store: Store, fetcher: Fetcher, settings: Settings, state: FSMContext
 ) -> None:
@@ -152,7 +146,6 @@ async def add_watch(
     )
 
 
-@router.callback_query(WatchCallback.filter(F.action == Action.TARGET))
 async def ask_target(
     query: CallbackQuery, callback_data: WatchCallback, store: Store, state: FSMContext
 ) -> None:
@@ -170,7 +163,6 @@ async def ask_target(
     await query.answer()
 
 
-@router.callback_query(WatchCallback.filter(F.action.in_({Action.REMOVE, Action.REMOVE_LISTED})))
 async def remove_watch(query: CallbackQuery, callback_data: WatchCallback, store: Store) -> None:
     lang = _lang(query)
     message = query.message
@@ -184,6 +176,20 @@ async def remove_watch(query: CallbackQuery, callback_data: WatchCallback, store
         await message.edit_text(text, reply_markup=keyboard)
     else:
         await message.edit_reply_markup(reply_markup=None)
+
+
+def create_router() -> Router:
+    router = Router(name="shelfwatch")
+    router.message.register(start, CommandStart())
+    router.message.register(show_list, Command("list"))
+    router.message.register(receive_target, TargetPrice.waiting, F.text)
+    router.message.register(add_watch, F.text)
+    router.callback_query.register(ask_target, WatchCallback.filter(F.action == Action.TARGET))
+    router.callback_query.register(
+        remove_watch,
+        WatchCallback.filter(F.action.in_({Action.REMOVE, Action.REMOVE_LISTED})),
+    )
+    return router
 
 
 def _first_url(message: Message) -> str | None:

@@ -13,7 +13,7 @@ from aiogram.enums import ParseMode
 from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from shelfwatch.bot import BotNotifier, router
+from shelfwatch.bot import BotNotifier, create_router
 from shelfwatch.config import Settings
 from shelfwatch.fetch import Fetcher
 from shelfwatch.store import Base, Store
@@ -45,7 +45,7 @@ async def main() -> None:
             interval=timedelta(seconds=settings.check_interval),
         )
         dispatcher = Dispatcher(store=store, fetcher=fetcher, settings=settings)
-        dispatcher.include_router(router)
+        dispatcher.include_router(create_router())
 
         watching = asyncio.create_task(watcher.run())
         try:
