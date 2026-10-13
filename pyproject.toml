@@ -1,0 +1,54 @@
+[project]
+name = "shelfwatch"
+version = "0.1.0"
+description = "Telegram bot that watches product pages and tells you when an item is back in stock or cheaper"
+readme = "README.md"
+license = "MIT"
+keywords = ["telegram", "bot", "price-tracker", "stock-alert", "aiogram"]
+authors = [
+    { name = "qweendev", email = "120177743+qweendev@users.noreply.github.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "aiogram>=3.31.0",
+    "aiosqlite>=0.22.1",
+    "httpx>=0.28.1",
+    "pydantic-settings>=2.15.0",
+    "selectolax>=1.0.0",
+    "sqlalchemy[asyncio]>=2.1.4",
+]
+
+[project.scripts]
+shelfwatch = "shelfwatch.__main__:run"
+
+[build-system]
+requires = ["uv_build>=0.13.0,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4.0",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "respx>=0.23.1",
+    "ruff>=0.17.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "RUF", "ASYNC", "PT", "RET", "PL", "N"]
+ignore = ["PLR0913", "PLR2004"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/shelfwatch/texts.py" = ["RUF001"]
+
+[tool.mypy]
+strict = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

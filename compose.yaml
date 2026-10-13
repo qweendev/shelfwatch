@@ -1,0 +1,10 @@
+services:
+  bot:
+    build: .
+    env_file: .env
+    volumes:
+      - data:/home/shelfwatch/data
+    restart: unless-stopped
+
+volumes:
+  data:
