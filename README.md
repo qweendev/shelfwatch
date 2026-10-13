@@ -7,6 +7,8 @@
 A Telegram bot that tells you when something you're waiting for is back in stock or gets cheaper.
 You send it a link and that's it, there's nothing else to set up.
 
+<p align="center"><img src="docs/demo.gif" alt="shelfwatch in a Telegram chat" width="360"></p>
+
 ## What it does
 
 When you send a link, the bot opens the page and shows you the price and stock right away. After that
